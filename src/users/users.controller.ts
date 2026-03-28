@@ -6,11 +6,13 @@ import {
   Param,
   Patch,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiOkResponse,
@@ -21,6 +23,7 @@ import {
 import { UserResponseDto } from './dto/user-response.dto';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @ApiTags('Users')
 @Controller('users')
@@ -39,6 +42,8 @@ export class UsersController {
     return newUser;
   }
 
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOperation({ summary: 'Get users' })
   @ApiOkResponse({
@@ -51,6 +56,8 @@ export class UsersController {
     return users;
   }
 
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiOperation({ summary: 'Get a user by id' })
   @ApiParam({ name: 'id', description: 'The user id' })
@@ -63,6 +70,8 @@ export class UsersController {
     return user;
   }
 
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a user' })
   @ApiBody({ type: UpdateUserDto })
@@ -79,6 +88,8 @@ export class UsersController {
     return updatedUser;
   }
 
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a user' })
   delete(@Param('id', ParseObjectIdPipe) id: string): Promise<void> {

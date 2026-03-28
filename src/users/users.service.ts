@@ -5,10 +5,14 @@ import { UserRepository } from './user.repository';
 import { ConflictError, EntityNotFoundError } from 'src/shared/errors/errors';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserData } from './types/update-user-data.type';
+import { PasswordHasher } from 'src/shared/security/password-hasher';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly passwordHasher: PasswordHasher,
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     const existingUser = await this.userRepository.findByEmail(
@@ -17,7 +21,14 @@ export class UsersService {
 
     if (existingUser) throw new ConflictError('Email already exist');
 
-    const newUser = await this.userRepository.create(createUserDto);
+    const hashedPassword = await this.passwordHasher.hash(
+      createUserDto.password,
+    );
+
+    const newUser = await this.userRepository.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
 
     return UserResponseDto.fromEntity(newUser);
   }
@@ -51,7 +62,7 @@ export class UsersService {
       data.email = email;
     }
 
-    if (password) data.password = password; //TODO falta hasheo de password
+    if (password) data.password = await this.passwordHasher.hash(password);
 
     const updatedUser = await this.userRepository.update(id, data);
 
