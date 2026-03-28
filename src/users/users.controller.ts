@@ -1,14 +1,26 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Patch,
+  Delete,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
 import {
   ApiBody,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { UserResponseDto } from './dto/user-response.dto';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -27,23 +39,49 @@ export class UsersController {
     return newUser;
   }
 
-  // @Get()
-  // findAll() {
-  //   return this.usersService.findAll();
-  // }
+  @Get()
+  @ApiOperation({ summary: 'Get users' })
+  @ApiOkResponse({
+    description: 'Return all users',
+    type: UserResponseDto,
+    isArray: true,
+  })
+  async findAll() {
+    const users = await this.usersService.findAll();
+    return users;
+  }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.usersService.findOne(+id);
-  // }
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a user by id' })
+  @ApiParam({ name: 'id', description: 'The user id' })
+  @ApiOkResponse({
+    description: 'Returns the user with the specified id',
+    type: UserResponseDto,
+  })
+  async findById(@Param('id', ParseObjectIdPipe) id: string) {
+    const user = await this.usersService.findById(id);
+    return user;
+  }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.usersService.update(+id, updateUserDto);
-  // }
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update a user' })
+  @ApiBody({ type: UpdateUserDto })
+  @ApiCreatedResponse({
+    description: 'The user has been succesfully updated',
+    type: UserResponseDto,
+  })
+  async update(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const updatedUser = await this.usersService.update(id, updateUserDto);
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.usersService.remove(+id);
-  // }
+    return updatedUser;
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a user' })
+  delete(@Param('id', ParseObjectIdPipe) id: string): Promise<void> {
+    return this.usersService.delete(id);
+  }
 }
