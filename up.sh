@@ -1,0 +1,1 @@
+docker-compose -p pn_challenge -f docker-compose.yml up --build --force-recreate
