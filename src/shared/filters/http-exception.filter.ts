@@ -6,7 +6,11 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { ConflictError, EntityNotFoundError } from '../errors/errors';
+import {
+  ConflictError,
+  EntityNotFoundError,
+  InvalidCredentialError,
+} from '../errors/errors';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -20,6 +24,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const status = exception.getStatus();
       const res = exception.getResponse();
       return response.status(status).json(res);
+    }
+
+    //errors 401
+    if (exception instanceof InvalidCredentialError) {
+      return response.status(HttpStatus.UNAUTHORIZED).json({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: exception.message,
+      });
     }
 
     //errors 404

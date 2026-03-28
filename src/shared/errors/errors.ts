@@ -11,3 +11,10 @@ export class EntityNotFoundError extends Error {
     this.name = 'EntityNotFoundError';
   }
 }
+
+export class InvalidCredentialError extends Error {
+  constructor() {
+    super('Invalid Credentials');
+    this.name = 'InvalidCredentialError';
+  }
+}
