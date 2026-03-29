@@ -28,12 +28,12 @@ import { TruckResponseDto } from './dto/truck-response.dto';
 import { UpdateTruckDto } from './dto/update-truck.dto';
 
 @ApiTags('Trucks')
+@ApiBearerAuth('jwt')
+@UseGuards(JwtAuthGuard)
 @Controller('trucks')
 export class TrucksController {
   constructor(private readonly trucksService: TrucksService) {}
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new truck' })
   @ApiBody({ type: CreateTruckDto })
@@ -48,8 +48,6 @@ export class TrucksController {
     return newTruck;
   }
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOperation({ summary: 'Get trucks' })
   @ApiOkResponse({
@@ -62,8 +60,6 @@ export class TrucksController {
     return trucks;
   }
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiOperation({ summary: 'Get a truck by id' })
   @ApiParam({ name: 'id', description: 'The truck id' })
@@ -76,8 +72,6 @@ export class TrucksController {
     return truck;
   }
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a user' })
   @ApiBody({ type: UpdateTruckDto })
@@ -94,8 +88,6 @@ export class TrucksController {
     return updatedTruck;
   }
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a truck' })
   delete(@Param('id', ParseObjectIdPipe) id: string): Promise<void> {

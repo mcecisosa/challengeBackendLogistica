@@ -1,17 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserRepository } from './user.repository';
-import { ConflictError, EntityNotFoundError } from 'src/shared/errors/errors';
+import {
+  BadRequestError,
+  ConflictError,
+  EntityNotFoundError,
+} from 'src/shared/errors/errors';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateUserData } from './types/update-user-data.type';
 import { PasswordHasher } from 'src/shared/security/password-hasher';
+import { OrderRepository } from 'src/orders/order.repository';
+import { TruckRepository } from 'src/trucks/truck.repository';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly passwordHasher: PasswordHasher,
+    @Inject(forwardRef(() => OrderRepository))
+    private readonly orderRepository: OrderRepository,
+    @Inject(forwardRef(() => TruckRepository))
+    private readonly truckRepository: TruckRepository,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
@@ -74,8 +84,23 @@ export class UsersService {
   }
 
   async delete(id: string): Promise<void> {
-    //TODO hacer control de si tiene camiones asociados
-    //TODO hacer control de si tiene ordenes asociados
+    //hace control de si tiene camiones asociados
+    //hace control de si tiene ordenes asociados
+    //---------------------------
+    //hace control de si tiene ordenes asociados
+    const existInOrder = await this.orderRepository.OrderHasUser(id);
+    console.log('existInOrder:', existInOrder);
+
+    const existInTruck = await this.truckRepository.TruckHasUser(id);
+    console.log('existInTruck:', existInTruck);
+
+    if (existInOrder || existInTruck)
+      throw new BadRequestError(
+        'user id',
+        'The User cannot be eliminated. It has one or more trucks/orders associated',
+      );
+
+    //---------------------------
 
     const deleted = await this.userRepository.delete(id);
 

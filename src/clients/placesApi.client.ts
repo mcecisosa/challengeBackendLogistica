@@ -38,8 +38,6 @@ export class PlacesApiClient {
 
       const response: AxiosResponse<PlaceApiResponse> = await axios.get(url);
 
-      console.log('RESPONSE GOOGLE:', response);
-
       if (response.data.status !== 'OK' || !response.data.result) return null;
 
       //------------

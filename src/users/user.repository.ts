@@ -5,6 +5,7 @@ import { User } from './entities/user.entity';
 import { UserDocument } from './schema/user.schema';
 import { CreateUserData } from './types/create-user-data.type';
 import { UpdateUserData } from './types/update-user-data.type';
+import { UserMapper } from './mapper/user.mapper';
 
 @Injectable()
 export class UserRepository {
@@ -18,7 +19,7 @@ export class UserRepository {
 
     const savedUser = await newUser.save();
 
-    return new User(savedUser.id, savedUser.email, savedUser.password);
+    return UserMapper.toEntity(savedUser);
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -26,14 +27,12 @@ export class UserRepository {
 
     if (!userDoc) return null;
 
-    return new User(userDoc._id.toString(), userDoc.email, userDoc.password);
+    return UserMapper.toEntity(userDoc);
   }
 
   async findAll(): Promise<User[]> {
     const users = await this.userModel.find().exec();
-    return users.map(
-      (user) => new User(user._id.toString(), user.email, user.password),
-    );
+    return users.map((user) => UserMapper.toEntity(user));
   }
 
   async findById(id: string): Promise<User | null> {
@@ -41,7 +40,7 @@ export class UserRepository {
 
     if (!user) return null;
 
-    return new User(user._id.toString(), user.email, user.password);
+    return UserMapper.toEntity(user);
   }
 
   async update(
@@ -54,7 +53,7 @@ export class UserRepository {
 
     if (!updated) return null;
 
-    return new User(updated.id, updated.email, updated.password);
+    return UserMapper.toEntity(updated);
   }
 
   async delete(id: string): Promise<boolean> {

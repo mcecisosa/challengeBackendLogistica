@@ -20,8 +20,8 @@ export class InvalidCredentialError extends Error {
 }
 
 export class BadRequestError extends Error {
-  constructor(field: string) {
-    super(`Invalid ${field}`);
+  constructor(field: string, message?: string) {
+    super(`Invalid ${field}. ${message}`);
     this.name = 'BadRequestError';
   }
 }

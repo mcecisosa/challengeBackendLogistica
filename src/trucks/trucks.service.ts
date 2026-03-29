@@ -1,16 +1,24 @@
-import { Injectable } from '@nestjs/common';
-import { ConflictError, EntityNotFoundError } from 'src/shared/errors/errors';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestError,
+  ConflictError,
+  EntityNotFoundError,
+} from 'src/shared/errors/errors';
 import { TruckRepository } from './truck.repository';
 import { CreateTruckDto } from './dto/create-truck.dto';
 import { TruckResponseDto } from './dto/truck-response.dto';
 import { UpdateTruckDto } from './dto/update-truck.dto';
 import { UserRepository } from 'src/users/user.repository';
+import { OrderRepository } from 'src/orders/order.repository';
 
 @Injectable()
 export class TrucksService {
   constructor(
     private readonly truckRepository: TruckRepository,
+    @Inject(forwardRef(() => UserRepository))
     private readonly userRepository: UserRepository,
+    @Inject(forwardRef(() => OrderRepository))
+    private readonly orderRepository: OrderRepository,
   ) {}
 
   async create(createTruckDto: CreateTruckDto): Promise<TruckResponseDto> {
@@ -68,7 +76,15 @@ export class TrucksService {
   }
 
   async delete(id: string): Promise<void> {
-    //TODO hacer control de si tiene ordenes asociados
+    //hace control de si tiene ordenes asociados
+    const existInOrder = await this.orderRepository.OrderHasTruck(id);
+    console.log('existInOrder:', existInOrder);
+
+    if (existInOrder)
+      throw new BadRequestError(
+        'truck id',
+        'The Truck cannot be eliminated. It has one or more orders associated',
+      );
 
     const deleted = await this.truckRepository.delete(id);
 
