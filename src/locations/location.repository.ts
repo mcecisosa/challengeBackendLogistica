@@ -5,6 +5,7 @@ import { LocationDocument } from './schema/location.schema';
 import { Location } from './entities/location.entity';
 import { CreateLocationData } from './types/create-location-data.type';
 import { UpdateLocationData } from './types/update-location-data.type';
+import { LocationMapper } from './mapper/location.mapper';
 
 @Injectable()
 export class LocationRepository {
@@ -16,28 +17,13 @@ export class LocationRepository {
   async create(createLocationData: CreateLocationData): Promise<Location> {
     const newLocation = await this.locationModel.create(createLocationData);
 
-    return new Location(
-      newLocation._id.toString(),
-      newLocation.address,
-      newLocation.place_id,
-      newLocation.latitude,
-      newLocation.longitude,
-    );
+    return LocationMapper.toEntity(newLocation);
   }
 
   async findAll(): Promise<Location[]> {
     const locations = await this.locationModel.find();
 
-    return locations.map(
-      (loc) =>
-        new Location(
-          loc._id.toString(),
-          loc.address,
-          loc.place_id,
-          loc.latitude,
-          loc.longitude,
-        ),
-    );
+    return locations.map((loc) => LocationMapper.toEntity(loc));
   }
 
   async findByPlaceId(place_id: string): Promise<Location | null> {
@@ -45,13 +31,7 @@ export class LocationRepository {
 
     if (!location) return null;
 
-    return new Location(
-      location._id.toString(),
-      location.address,
-      location.place_id,
-      location.latitude,
-      location.longitude,
-    );
+    return LocationMapper.toEntity(location);
   }
 
   async findById(id: string): Promise<Location | null> {
@@ -59,13 +39,7 @@ export class LocationRepository {
 
     if (!location) return null;
 
-    return new Location(
-      location._id.toString(),
-      location.address,
-      location.place_id,
-      location.latitude,
-      location.longitude,
-    );
+    return LocationMapper.toEntity(location);
   }
 
   async update(
@@ -82,13 +56,7 @@ export class LocationRepository {
 
     if (!updated) return null;
 
-    return new Location(
-      updated._id.toString(),
-      updated.address,
-      updated.place_id,
-      updated.latitude,
-      updated.longitude,
-    );
+    return LocationMapper.toEntity(updated);
   }
 
   async delete(id: string): Promise<boolean> {
