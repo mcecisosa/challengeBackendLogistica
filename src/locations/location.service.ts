@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import {
   BadRequestError,
   ConflictError,
@@ -10,12 +10,15 @@ import { Location } from './entities/location.entity';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { PlacesApiClient } from 'src/clients/placesApi.client';
+import { OrderRepository } from 'src/orders/order.repository';
 
 @Injectable()
 export class LocationService {
   constructor(
     private readonly locationRepository: LocationRepository,
     private readonly placeApiClient: PlacesApiClient,
+    @Inject(forwardRef(() => OrderRepository))
+    private readonly orderRepository: OrderRepository,
   ) {}
 
   async create(createLocationDto: CreateLocationDto): Promise<Location> {
@@ -88,7 +91,14 @@ export class LocationService {
   }
 
   async delete(id: string): Promise<void> {
-    //TODO hacer control de si tiene ordenes asociados
+    //hace control de si tiene ordenes asociados
+    const existInOrder = await this.orderRepository.OrderHasLocation(id);
+
+    if (existInOrder)
+      throw new BadRequestError(
+        'location id',
+        'The location cannot be eliminated. It has one or more orders associated',
+      );
 
     const deleted = await this.locationRepository.delete(id);
 
