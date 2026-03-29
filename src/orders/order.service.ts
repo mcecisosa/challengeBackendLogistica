@@ -6,6 +6,7 @@ import { Order } from './entities/order.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { TruckRepository } from 'src/trucks/truck.repository';
 import { LocationRepository } from 'src/locations/location.repository';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Injectable()
 export class OrderService {
@@ -39,48 +40,55 @@ export class OrderService {
     return newOrder;
   }
 
-  // async findAll(): Promise<TruckResponseDto[]> {
-  //   const trucks = await this.truckRepository.findAll();
+  async findAll(): Promise<Order[]> {
+    const orders = await this.orderRepository.findAll();
 
-  //   return trucks.map((truck) => TruckResponseDto.fromEntity(truck));
-  // }
+    return orders;
+  }
 
-  // async findById(id: string): Promise<TruckResponseDto> {
-  //   const truck = await this.truckRepository.findById(id);
+  async findById(id: string): Promise<Order> {
+    const order = await this.orderRepository.findById(id);
 
-  //   if (!truck) throw new EntityNotFoundError('Truck', id);
+    if (!order) throw new EntityNotFoundError('Order', id);
 
-  //   return TruckResponseDto.fromEntity(truck);
-  // }
+    return order;
+  }
 
-  // async update(
-  //   id: string,
-  //   updateTruckDto: UpdateTruckDto,
-  // ): Promise<TruckResponseDto> {
-  //   const { plates, user } = updateTruckDto;
+  async update(id: string, updateOrderDto: UpdateOrderDto): Promise<Order> {
+    const { user, truck, pickup, dropoff } = updateOrderDto;
 
-  //   if (plates) {
-  //     const existingTruck = await this.truckRepository.findByPlates(plates);
-  //     if (existingTruck && existingTruck.id !== id)
-  //       throw new ConflictError('Truck already exist');
-  //   }
-  //   if (user) {
-  //     const existingUser = await this.userRepository.findById(user);
-  //     if (!existingUser) throw new EntityNotFoundError('User', user);
-  //   }
+    if (user) {
+      const existingUser = await this.userRepository.findById(user);
+      if (!existingUser) throw new EntityNotFoundError('User', user);
+    }
 
-  //   const updatedTruck = await this.truckRepository.update(id, updateTruckDto);
+    if (truck) {
+      const existingTruck = await this.truckRepository.findById(truck);
+      if (!existingTruck) throw new EntityNotFoundError('Truck', truck);
+    }
 
-  //   if (!updatedTruck) throw new EntityNotFoundError('Truck', id);
+    if (pickup) {
+      const existingLocation = await this.locationRepository.findById(pickup);
+      if (!existingLocation)
+        throw new EntityNotFoundError('Location pickup', pickup);
+    }
 
-  //   return TruckResponseDto.fromEntity(updatedTruck);
-  // }
+    if (dropoff) {
+      const existingLocation = await this.locationRepository.findById(dropoff);
+      if (!existingLocation)
+        throw new EntityNotFoundError('Location dropoff', dropoff);
+    }
 
-  // async delete(id: string): Promise<void> {
-  //   //TODO hacer control de si tiene ordenes asociados
+    const updatedOrder = await this.orderRepository.update(id, updateOrderDto);
 
-  //   const deleted = await this.truckRepository.delete(id);
+    if (!updatedOrder) throw new EntityNotFoundError('Order', id);
 
-  //   if (!deleted) throw new EntityNotFoundError('Truck', id);
-  // }
+    return updatedOrder;
+  }
+
+  async delete(id: string): Promise<void> {
+    const deleted = await this.orderRepository.delete(id);
+
+    if (!deleted) throw new EntityNotFoundError('Order', id);
+  }
 }

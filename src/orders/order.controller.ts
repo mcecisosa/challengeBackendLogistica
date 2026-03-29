@@ -1,15 +1,28 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Delete,
+  Param,
+  Patch,
+} from '@nestjs/common';
 import {
   //ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 //import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { ParseObjectIdPipe } from '@nestjs/mongoose';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -34,57 +47,51 @@ export class OrdersController {
     return OrderResponseDto.fromEntity(newOrder);
   }
 
-  // @ApiBearerAuth('jwt')
-  // @UseGuards(JwtAuthGuard)
-  // @Get()
-  // @ApiOperation({ summary: 'Get trucks' })
-  // @ApiOkResponse({
-  //   description: 'Return all trucks',
-  //   type: TruckResponseDto,
-  //   isArray: true,
-  // })
-  // async findAll() {
-  //   const trucks = await this.trucksService.findAll();
-  //   return trucks;
-  // }
+  @Get()
+  @ApiOperation({ summary: 'Get trucks' })
+  @ApiOkResponse({
+    description: 'Return all trucks',
+    type: OrderResponseDto,
+    isArray: true,
+  })
+  async findAll() {
+    const orders = await this.orderService.findAll();
 
-  // @ApiBearerAuth('jwt')
-  // @UseGuards(JwtAuthGuard)
-  // @Get(':id')
-  // @ApiOperation({ summary: 'Get a truck by id' })
-  // @ApiParam({ name: 'id', description: 'The truck id' })
-  // @ApiOkResponse({
-  //   description: 'Returns the truck with the specified id',
-  //   type: TruckResponseDto,
-  // })
-  // async findById(@Param('id', ParseObjectIdPipe) id: string) {
-  //   const truck = await this.trucksService.findById(id);
-  //   return truck;
-  // }
+    return orders.map((order) => OrderResponseDto.fromEntity(order));
+  }
 
-  // @ApiBearerAuth('jwt')
-  // @UseGuards(JwtAuthGuard)
-  // @Patch(':id')
-  // @ApiOperation({ summary: 'Update a user' })
-  // @ApiBody({ type: UpdateTruckDto })
-  // @ApiCreatedResponse({
-  //   description: 'The truck has been succesfully updated',
-  //   type: TruckResponseDto,
-  // })
-  // async update(
-  //   @Param('id', ParseObjectIdPipe) id: string,
-  //   @Body() updateTruckDto: UpdateTruckDto,
-  // ) {
-  //   const updatedTruck = await this.trucksService.update(id, updateTruckDto);
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a order by id' })
+  @ApiParam({ name: 'id', description: 'The order id' })
+  @ApiOkResponse({
+    description: 'Returns the order with the specified id',
+    type: OrderResponseDto,
+  })
+  async findById(@Param('id', ParseObjectIdPipe) id: string) {
+    const order = await this.orderService.findById(id);
+    return OrderResponseDto.fromEntity(order);
+  }
 
-  //   return updatedTruck;
-  // }
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update a order' })
+  @ApiBody({ type: UpdateOrderDto })
+  @ApiCreatedResponse({
+    description: 'The order has been succesfully updated',
+    type: OrderResponseDto,
+  })
+  async update(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() updateOrderDto: UpdateOrderDto,
+  ) {
+    const updatedOrder = await this.orderService.update(id, updateOrderDto);
 
-  // @ApiBearerAuth('jwt')
-  // @UseGuards(JwtAuthGuard)
-  // @Delete(':id')
-  // @ApiOperation({ summary: 'Delete a truck' })
-  // delete(@Param('id', ParseObjectIdPipe) id: string): Promise<void> {
-  //   return this.trucksService.delete(id);
-  // }
+    return OrderResponseDto.fromEntity(updatedOrder);
+  }
+
+  @ApiNoContentResponse({ description: 'Order deleted successfully' })
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete a order' })
+  delete(@Param('id', ParseObjectIdPipe) id: string): Promise<void> {
+    return this.orderService.delete(id);
+  }
 }

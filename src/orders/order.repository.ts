@@ -6,6 +6,7 @@ import { OrderDocument } from './schema/order.schema';
 import { Order } from './entities/order.entity';
 import { OrderDbRaw } from './types/order-db-raw';
 import { OrderMapper } from './mappers/order.mapper';
+import { UpdateOrderData } from './types/update-order-data.type';
 
 @Injectable()
 export class OrderRepository {
@@ -28,7 +29,79 @@ export class OrderRepository {
 
     const result = await this.orderModel.aggregate<OrderDbRaw>([
       { $match: { _id: newOrder._id } },
+      ...this.orderAggregationPipeline,
+    ]);
 
+    const orderData = result[0];
+
+    return OrderMapper.toEntity(orderData);
+  }
+
+  async findAll(): Promise<Order[]> {
+    const orders = await this.orderModel.aggregate<OrderDbRaw>([
+      ...this.orderAggregationPipeline,
+    ]);
+
+    return orders.map((order) => OrderMapper.toEntity(order));
+  }
+
+  async findById(id: string): Promise<Order | null> {
+    const result = await this.orderModel.aggregate<OrderDbRaw>([
+      { $match: { _id: id } },
+      ...this.orderAggregationPipeline,
+    ]);
+
+    const orderData = result[0];
+
+    return OrderMapper.toEntity(orderData);
+  }
+
+  async update(
+    id: string,
+    updateOrderData: UpdateOrderData,
+  ): Promise<Order | null> {
+    console.log('DATA LLEGA UPDATE REPOS', updateOrderData);
+
+    const { user, truck, pickup, dropoff } = updateOrderData;
+
+    const dataToUpdate = {
+      user: user ? new Types.ObjectId(user) : undefined,
+      truck: truck ? new Types.ObjectId(truck) : undefined,
+      pickup: pickup ? new Types.ObjectId(pickup) : undefined,
+      dropoff: dropoff ? new Types.ObjectId(dropoff) : undefined,
+    };
+
+    const updated = await this.orderModel.findByIdAndUpdate(id, dataToUpdate, {
+      new: true,
+    });
+    console.log('DATA LLEGA UPDATE updated', updated);
+    if (!updated) return null;
+
+    const result = await this.orderModel.aggregate<OrderDbRaw>([
+      { $match: { _id: new Types.ObjectId(id) } },
+      ...this.orderAggregationPipeline,
+    ]);
+
+    console.log('DATA LLEGA UPDATE result', result);
+
+    const orderData = result[0];
+
+    console.log('DATA LLEGA UPDATE orderData', orderData);
+
+    if (!orderData) return null;
+
+    return OrderMapper.toEntity(orderData);
+  }
+
+  async delete(id: string): Promise<boolean> {
+    const deleted = await this.orderModel.findByIdAndDelete(id).exec();
+
+    if (!deleted) return false;
+    return true;
+  }
+
+  private get orderAggregationPipeline() {
+    return [
       {
         $lookup: {
           from: 'userdocuments',
@@ -84,98 +157,64 @@ export class OrderRepository {
           'dropoff.id': { $toString: '$dropoff._id' },
         },
       },
-    ]);
-
-    const orderData = result[0];
-
-    return OrderMapper.toEntity(orderData);
+    ];
   }
-
-  // async findAll(): Promise<Truck[]> {
-  //   const trucks = await this.truckModel
-  //     .find()
-  //     .populate<{ user: User }>('user');
-
-  //   return trucks.map(
-  //     (truck) =>
-  //       new Truck(
-  //         truck._id.toString(),
-  //         truck.year,
-  //         truck.color,
-  //         truck.plates,
-  //         truck.user,
-  //       ),
-  //   );
-  // }
-
-  // async findByPlates(plates: string): Promise<Truck | null> {
-  //   const truck = await this.truckModel
-  //     .findOne({ plates })
-  //     .populate<{ user: User }>('user')
-  //     .exec();
-
-  //   if (!truck) return null;
-
-  //   return new Truck(
-  //     truck._id.toString(),
-  //     truck.year,
-  //     truck.color,
-  //     truck.plates,
-  //     truck.user,
-  //   );
-  // }
-
-  // async findById(id: string): Promise<Truck | null> {
-  //   const truck = await this.truckModel
-  //     .findById(id)
-  //     .populate<{ user: User }>('user')
-  //     .exec();
-
-  //   if (!truck) return null;
-
-  //   return new Truck(
-  //     truck._id.toString(),
-  //     truck.year,
-  //     truck.color,
-  //     truck.plates,
-  //     truck.user,
-  //   );
-  // }
-
-  // async update(
-  //   id: string,
-  //   updateTruckData: UpdateTruckData,
-  // ): Promise<Truck | null> {
-  //   const updated = await this.truckModel.findByIdAndUpdate(
-  //     id,
-  //     updateTruckData,
-  //     {
-  //       new: true,
-  //     },
-  //   );
-
-  //   if (!updated) return null;
-
-  //   const updatedTruck = await this.truckModel
-  //     .findById(updated._id)
-  //     .populate<{ user: User }>('user');
-
-  //   if (!updatedTruck)
-  //     throw new EntityNotFoundError('Truck not found', updated._id.toString());
-
-  //   return new Truck(
-  //     updatedTruck._id.toString(),
-  //     updatedTruck.year,
-  //     updatedTruck.color,
-  //     updatedTruck.plates,
-  //     updatedTruck.user,
-  //   );
-  // }
-
-  // async delete(id: string): Promise<boolean> {
-  //   const deleted = await this.truckModel.findByIdAndDelete(id).exec();
-
-  //   if (!deleted) return false;
-  //   return true;
-  // }
 }
+// const result = await this.orderModel.aggregate<OrderDbRaw>([
+//   { $match: { _id: newOrder._id } },
+//   {
+//     $lookup: {
+//       from: 'userdocuments',
+//       localField: 'user',
+//       foreignField: '_id',
+//       as: 'user',
+//     },
+//   },
+//   { $unwind: '$user' },
+//   {
+//     $lookup: {
+//       from: 'truckdocuments',
+//       localField: 'truck',
+//       foreignField: '_id',
+//       as: 'truck',
+//     },
+//   },
+//   { $unwind: '$truck' },
+//   {
+//     $lookup: {
+//       from: 'userdocuments',
+//       localField: 'truck.user',
+//       foreignField: '_id',
+//       as: 'truck.user',
+//     },
+//   },
+//   { $unwind: '$truck.user' },
+//   {
+//     $lookup: {
+//       from: 'locationdocuments',
+//       localField: 'pickup',
+//       foreignField: '_id',
+//       as: 'pickup',
+//     },
+//   },
+//   { $unwind: '$pickup' },
+//   {
+//     $lookup: {
+//       from: 'locationdocuments',
+//       localField: 'dropoff',
+//       foreignField: '_id',
+//       as: 'dropoff',
+//     },
+//   },
+//   { $unwind: '$dropoff' },
+//   {
+//     $addFields: {
+//       id: { $toString: '$_id' },
+//       'user.id': { $toString: '$user._id' },
+//       'truck.id': { $toString: '$truck._id' },
+//       'truck.user.id': { $toString: '$truck.user._id' },
+//       'pickup.id': { $toString: '$pickup._id' },
+//       'dropoff.id': { $toString: '$dropoff._id' },
+//     },
+//   },
+// ]);
