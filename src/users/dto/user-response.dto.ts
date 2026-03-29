@@ -11,18 +11,6 @@ export class UserResponseDto {
   })
   email: string;
 
-  @ApiProperty({
-    description: 'The creation date of the user',
-    example: '2026-03-28T00:28:45.450Z',
-  })
-  createdAt?: Date;
-
-  @ApiProperty({
-    description: 'The last update of the user',
-    example: '2026-03-28T00:28:45.450Z',
-  })
-  updatedAt?: Date;
-
   static fromEntity(user: User): UserResponseDto {
     return {
       id: user.id,
