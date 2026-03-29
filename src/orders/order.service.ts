@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EntityNotFoundError } from 'src/shared/errors/errors';
+import { BadRequestError, EntityNotFoundError } from 'src/shared/errors/errors';
 import { UserRepository } from 'src/users/user.repository';
 import { OrderRepository } from './order.repository';
 import { Order } from './entities/order.entity';
@@ -7,6 +7,8 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { TruckRepository } from 'src/trucks/truck.repository';
 import { LocationRepository } from 'src/locations/location.repository';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { UpdateStatusOrderDto } from './dto/update-status.dto';
+import { OrderStatus } from './types/order-status.enum';
 
 @Injectable()
 export class OrderService {
@@ -80,6 +82,49 @@ export class OrderService {
     }
 
     const updatedOrder = await this.orderRepository.update(id, updateOrderDto);
+
+    if (!updatedOrder) throw new EntityNotFoundError('Order', id);
+
+    return updatedOrder;
+  }
+
+  async updateStatus(
+    id: string,
+    updateStatusOrderDto: UpdateStatusOrderDto,
+  ): Promise<Order> {
+    const order = await this.orderRepository.findById(id);
+
+    if (!order) throw new EntityNotFoundError('Order', id);
+
+    //control transicion estados
+    if (
+      order.status === OrderStatus.CREATED &&
+      updateStatusOrderDto.status !== OrderStatus.IN_TRANSIT
+    )
+      throw new BadRequestError(
+        'status',
+        `Order with status ${OrderStatus.CREATED} only can chage to ${OrderStatus.IN_TRANSIT}`,
+      );
+
+    if (
+      order.status === OrderStatus.IN_TRANSIT &&
+      updateStatusOrderDto.status !== OrderStatus.COMPLETED
+    )
+      throw new BadRequestError(
+        'status',
+        `Order with status ${OrderStatus.IN_TRANSIT} only can chage to ${OrderStatus.COMPLETED}`,
+      );
+
+    if (order.status === OrderStatus.COMPLETED)
+      throw new BadRequestError(
+        'status',
+        `Order with status ${OrderStatus.COMPLETED} cannot be changed`,
+      );
+
+    const updatedOrder = await this.orderRepository.updateStatus(
+      id,
+      updateStatusOrderDto,
+    );
 
     if (!updatedOrder) throw new EntityNotFoundError('Order', id);
 

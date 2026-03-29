@@ -6,9 +6,10 @@ import {
   Delete,
   Param,
   Patch,
+  Put,
 } from '@nestjs/common';
 import {
-  //ApiBearerAuth,
+  ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
   ApiNoContentResponse,
@@ -17,20 +18,21 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-//import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { OrderResponseDto } from './dto/order-response.dto';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { UpdateStatusOrderDto } from './dto/update-status.dto';
 
 @ApiTags('Orders')
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly orderService: OrderService) {}
 
-  // @ApiBearerAuth('jwt')
-  // @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('jwt')
+  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new order' })
   @ApiBody({ type: CreateOrderDto })
@@ -84,6 +86,25 @@ export class OrdersController {
     @Body() updateOrderDto: UpdateOrderDto,
   ) {
     const updatedOrder = await this.orderService.update(id, updateOrderDto);
+
+    return OrderResponseDto.fromEntity(updatedOrder);
+  }
+
+  @Put(':id')
+  @ApiOperation({ summary: 'Update a status of the order' })
+  @ApiBody({ type: UpdateStatusOrderDto })
+  @ApiOkResponse({
+    description: 'The status has been succesfully updated',
+    type: OrderResponseDto,
+  })
+  async updateStatus(
+    @Param('id', ParseObjectIdPipe) id: string,
+    @Body() updateStatusOrderDto: UpdateStatusOrderDto,
+  ): Promise<OrderResponseDto> {
+    const updatedOrder = await this.orderService.updateStatus(
+      id,
+      updateStatusOrderDto,
+    );
 
     return OrderResponseDto.fromEntity(updatedOrder);
   }
