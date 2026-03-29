@@ -7,6 +7,8 @@ import { Truck } from './entities/truck.entity';
 import { UpdateTruckData } from './types/update-truck-data.type';
 import { User } from 'src/users/entities/user.entity';
 import { EntityNotFoundError } from 'src/shared/errors/errors';
+import { TruckMapper } from './mappers/truck.mapper';
+import { TruckDbRaw } from 'src/orders/types/order-db-raw';
 
 @Injectable()
 export class TruckRepository {
@@ -23,18 +25,14 @@ export class TruckRepository {
 
     const addedTruck = await this.truckModel
       .findById(newTruck._id)
-      .populate<{ user: User }>('user');
+      .populate('user')
+      .lean()
+      .exec();
 
     if (!addedTruck)
       throw new EntityNotFoundError('Truck not found', newTruck._id.toString());
 
-    return new Truck(
-      addedTruck.id,
-      addedTruck.year,
-      addedTruck.color,
-      addedTruck.plates,
-      addedTruck.user,
-    );
+    return TruckMapper.toEntity(addedTruck as unknown as TruckDbRaw);
   }
 
   async findAll(): Promise<Truck[]> {
@@ -42,15 +40,8 @@ export class TruckRepository {
       .find()
       .populate<{ user: User }>('user');
 
-    return trucks.map(
-      (truck) =>
-        new Truck(
-          truck._id.toString(),
-          truck.year,
-          truck.color,
-          truck.plates,
-          truck.user,
-        ),
+    return trucks.map((truck) =>
+      TruckMapper.toEntity(truck as unknown as TruckDbRaw),
     );
   }
 
@@ -62,13 +53,7 @@ export class TruckRepository {
 
     if (!truck) return null;
 
-    return new Truck(
-      truck._id.toString(),
-      truck.year,
-      truck.color,
-      truck.plates,
-      truck.user,
-    );
+    return TruckMapper.toEntity(truck as unknown as TruckDbRaw);
   }
 
   async findById(id: string): Promise<Truck | null> {
@@ -79,13 +64,7 @@ export class TruckRepository {
 
     if (!truck) return null;
 
-    return new Truck(
-      truck._id.toString(),
-      truck.year,
-      truck.color,
-      truck.plates,
-      truck.user,
-    );
+    return TruckMapper.toEntity(truck as unknown as TruckDbRaw);
   }
 
   async update(
@@ -109,13 +88,7 @@ export class TruckRepository {
     if (!updatedTruck)
       throw new EntityNotFoundError('Truck not found', updated._id.toString());
 
-    return new Truck(
-      updatedTruck._id.toString(),
-      updatedTruck.year,
-      updatedTruck.color,
-      updatedTruck.plates,
-      updatedTruck.user,
-    );
+    return TruckMapper.toEntity(updatedTruck as unknown as TruckDbRaw);
   }
 
   async delete(id: string): Promise<boolean> {
@@ -125,15 +98,3 @@ export class TruckRepository {
     return true;
   }
 }
-
-// const trucks = await this.truckModel.aggregate([
-//   {
-//     $lookup: {
-//       from: 'users',
-//       localField: 'user',
-//       foreignField: '_id',
-//       as: 'userDetails',
-//     },
-//   },
-//   { $unwind: '$userDetails' },
-// ]);
