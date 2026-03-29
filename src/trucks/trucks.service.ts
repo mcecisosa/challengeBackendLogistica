@@ -52,7 +52,7 @@ export class TrucksService {
 
     if (plates) {
       const existingTruck = await this.truckRepository.findByPlates(plates);
-      if (existingTruck && existingTruck.plates !== id)
+      if (existingTruck && existingTruck.id !== id)
         throw new ConflictError('Truck already exist');
     }
     if (user) {

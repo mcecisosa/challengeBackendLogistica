@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
+  BadRequestError,
   ConflictError,
   EntityNotFoundError,
   InvalidCredentialError,
@@ -24,6 +25,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const status = exception.getStatus();
       const res = exception.getResponse();
       return response.status(status).json(res);
+    }
+
+    //errors 40
+    if (exception instanceof BadRequestError) {
+      return response.status(HttpStatus.BAD_REQUEST).json({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: exception.message,
+      });
     }
 
     //errors 401

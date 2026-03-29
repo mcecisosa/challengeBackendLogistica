@@ -18,3 +18,10 @@ export class InvalidCredentialError extends Error {
     this.name = 'InvalidCredentialError';
   }
 }
+
+export class BadRequestError extends Error {
+  constructor(field: string) {
+    super(`Invalid ${field}`);
+    this.name = 'BadRequestError';
+  }
+}
