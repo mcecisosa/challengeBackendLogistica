@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { SharedModule } from 'src/shared/shared.module';
 import { OrdersController } from './order.controller';
@@ -24,12 +24,12 @@ import { OrderDocument, OrderSchema } from './schema/order.schema';
       { name: LocationDocument.name, schema: LocationSchema },
     ]),
     SharedModule,
-    UsersModule,
-    TrucksModule,
-    LocationModule,
+    forwardRef(() => TrucksModule),
+    forwardRef(() => LocationModule),
+    forwardRef(() => UsersModule),
   ],
   controllers: [OrdersController],
   providers: [OrderService, OrderRepository],
-  exports: [OrderRepository],
+  exports: [OrderService, OrderRepository],
 })
 export class OrdersModule {}
