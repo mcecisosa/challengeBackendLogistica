@@ -1,3 +1,5 @@
+import { OrderStatus } from './order-status.enum';
+
 export interface UserDbRaw {
   _id: any;
   id?: string;
@@ -26,7 +28,7 @@ export interface TruckDbRaw {
 export interface OrderDbRaw {
   _id: any;
   id: string;
-  status: string;
+  status: OrderStatus;
   user: UserDbRaw;
   truck: TruckDbRaw;
   pickup: LocationDbRaw;
