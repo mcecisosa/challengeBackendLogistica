@@ -97,4 +97,12 @@ export class TruckRepository {
     if (!deleted) return false;
     return true;
   }
+
+  async TruckHasUser(userId: string): Promise<boolean> {
+    const count = await this.truckModel
+      .countDocuments({ user: new Types.ObjectId(userId) })
+      .exec();
+
+    return count > 0;
+  }
 }

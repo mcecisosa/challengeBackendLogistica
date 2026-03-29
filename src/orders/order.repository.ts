@@ -44,6 +44,7 @@ export class OrderRepository {
     const orders = await this.orderModel.aggregate<OrderDbRaw>([
       ...this.orderAggregationPipeline,
     ]);
+    console.log('DESP FIND ALL', orders);
 
     return orders.map((order) => OrderMapper.toEntity(order));
   }
@@ -132,6 +133,35 @@ export class OrderRepository {
 
     if (!deleted) return false;
     return true;
+  }
+
+  async OrderHasLocation(locationId: string): Promise<boolean> {
+    const count = await this.orderModel
+      .countDocuments({
+        $or: [
+          { pickup: new Types.ObjectId(locationId) },
+          { dropoff: new Types.ObjectId(locationId) },
+        ],
+      })
+      .exec();
+
+    return count > 0;
+  }
+
+  async OrderHasTruck(truckId: string): Promise<boolean> {
+    const count = await this.orderModel
+      .countDocuments({ truck: new Types.ObjectId(truckId) })
+      .exec();
+
+    return count > 0;
+  }
+
+  async OrderHasUser(userId: string): Promise<boolean> {
+    const count = await this.orderModel
+      .countDocuments({ user: new Types.ObjectId(userId) })
+      .exec();
+
+    return count > 0;
   }
 
   private get orderAggregationPipeline() {
