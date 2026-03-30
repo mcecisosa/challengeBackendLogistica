@@ -26,12 +26,12 @@ import { UpdateLocationDto } from './dto/update-location.dto';
 import { LocationResponseDto } from './dto/location-response.dto';
 
 @ApiTags('Location')
+@ApiBearerAuth('jwt')
+@UseGuards(JwtAuthGuard)
 @Controller('locations')
 export class LocationController {
   constructor(private readonly locationsService: LocationService) {}
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new location' })
   @ApiBody({ type: CreateLocationDto })
@@ -46,8 +46,6 @@ export class LocationController {
     return LocationResponseDto.fromEntity(newLocation);
   }
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(JwtAuthGuard)
   @Get()
   @ApiOperation({ summary: 'Get locations' })
   @ApiOkResponse({
@@ -60,8 +58,6 @@ export class LocationController {
     return locations.map((loc) => LocationResponseDto.fromEntity(loc));
   }
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiOperation({ summary: 'Get a location by id' })
   @ApiParam({ name: 'id', description: 'The location id' })
@@ -76,8 +72,6 @@ export class LocationController {
     return LocationResponseDto.fromEntity(location);
   }
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(JwtAuthGuard)
   @Put(':id')
   @ApiOperation({ summary: 'Update a location' })
   @ApiBody({ type: UpdateLocationDto })
@@ -97,8 +91,6 @@ export class LocationController {
     return LocationResponseDto.fromEntity(updatedLocation);
   }
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(JwtAuthGuard)
   @ApiNoContentResponse({ description: 'Location deleted successfully' })
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a location' })

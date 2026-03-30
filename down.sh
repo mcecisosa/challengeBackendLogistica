@@ -1,0 +1,1 @@
+docker-compose -p pn_challenge down -v
