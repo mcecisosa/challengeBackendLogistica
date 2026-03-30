@@ -60,8 +60,8 @@ chmod +x ./down.sh
 configurar .env
 
 bash
-npm install
-npm run start:dev
+- npm install
+- npm run start:dev
 
 
 ## Techs
