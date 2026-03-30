@@ -1,4 +1,3 @@
-export type UpdateUserData = {
-  email?: string;
-  password?: string;
-};
+import { CreateUserData } from './create-user-data.type';
+
+export type UpdateUserData = Partial<CreateUserData>;
