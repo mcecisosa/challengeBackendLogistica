@@ -37,8 +37,6 @@ export class OrderService {
 
     const newOrder = await this.orderRepository.create(createOrderDto);
 
-    console.log('newOrder del SERVICE:', newOrder);
-
     return newOrder;
   }
 

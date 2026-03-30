@@ -39,7 +39,7 @@ export class UsersController {
   })
   async create(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
     const newUser = await this.usersService.create(createUserDto);
-    return newUser;
+    return UserResponseDto.fromEntity(newUser);
   }
 
   @ApiBearerAuth('jwt')
@@ -51,9 +51,9 @@ export class UsersController {
     type: UserResponseDto,
     isArray: true,
   })
-  async findAll() {
+  async findAll(): Promise<UserResponseDto[]> {
     const users = await this.usersService.findAll();
-    return users;
+    return users.map((user) => UserResponseDto.fromEntity(user));
   }
 
   @ApiBearerAuth('jwt')
@@ -65,9 +65,11 @@ export class UsersController {
     description: 'Returns the user with the specified id',
     type: UserResponseDto,
   })
-  async findById(@Param('id', ParseObjectIdPipe) id: string) {
+  async findById(
+    @Param('id', ParseObjectIdPipe) id: string,
+  ): Promise<UserResponseDto> {
     const user = await this.usersService.findById(id);
-    return user;
+    return UserResponseDto.fromEntity(user);
   }
 
   @ApiBearerAuth('jwt')
@@ -82,10 +84,9 @@ export class UsersController {
   async update(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateUserDto: UpdateUserDto,
-  ) {
+  ): Promise<UserResponseDto> {
     const updatedUser = await this.usersService.update(id, updateUserDto);
-
-    return updatedUser;
+    return UserResponseDto.fromEntity(updatedUser);
   }
 
   @ApiBearerAuth('jwt')
