@@ -1,9 +1,24 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+import { DatabaseModule } from './database/database.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { TrucksModule } from './trucks/trucks.module';
+import { LocationModule } from './locations/location.module';
+import { OrdersModule } from './orders/order.module';
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    DatabaseModule,
+    UsersModule,
+    AuthModule,
+    TrucksModule,
+    LocationModule,
+    OrdersModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
