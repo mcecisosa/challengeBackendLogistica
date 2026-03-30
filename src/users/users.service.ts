@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UserResponseDto } from './dto/user-response.dto';
 import { UserRepository } from './user.repository';
 import {
   BadRequestError,
@@ -12,6 +11,7 @@ import { UpdateUserData } from './types/update-user-data.type';
 import { PasswordHasher } from 'src/shared/security/password-hasher';
 import { OrderRepository } from 'src/orders/order.repository';
 import { TruckRepository } from 'src/trucks/truck.repository';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -24,7 +24,7 @@ export class UsersService {
     private readonly truckRepository: TruckRepository,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.userRepository.findByEmail(
       createUserDto.email,
     );
@@ -40,27 +40,24 @@ export class UsersService {
       password: hashedPassword,
     });
 
-    return UserResponseDto.fromEntity(newUser);
+    return newUser;
   }
 
-  async findAll(): Promise<UserResponseDto[]> {
+  async findAll(): Promise<User[]> {
     const users = await this.userRepository.findAll();
 
-    return users.map((user) => UserResponseDto.fromEntity(user));
+    return users;
   }
 
-  async findById(id: string): Promise<UserResponseDto> {
+  async findById(id: string): Promise<User> {
     const user = await this.userRepository.findById(id);
 
     if (!user) throw new EntityNotFoundError('User', id);
 
-    return UserResponseDto.fromEntity(user);
+    return user;
   }
 
-  async update(
-    id: string,
-    updateUserDto: UpdateUserDto,
-  ): Promise<UserResponseDto> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const { email, password } = updateUserDto;
     const data: UpdateUserData = {};
 
@@ -80,14 +77,13 @@ export class UsersService {
 
     console.log('updated:', updatedUser);
 
-    return UserResponseDto.fromEntity(updatedUser);
+    return updatedUser;
   }
 
   async delete(id: string): Promise<void> {
     //hace control de si tiene camiones asociados
     //hace control de si tiene ordenes asociados
-    //---------------------------
-    //hace control de si tiene ordenes asociados
+
     const existInOrder = await this.orderRepository.OrderHasUser(id);
     console.log('existInOrder:', existInOrder);
 
@@ -99,8 +95,6 @@ export class UsersService {
         'user id',
         'The User cannot be eliminated. It has one or more trucks/orders associated',
       );
-
-    //---------------------------
 
     const deleted = await this.userRepository.delete(id);
 

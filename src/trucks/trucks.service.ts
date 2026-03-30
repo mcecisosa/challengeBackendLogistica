@@ -6,10 +6,10 @@ import {
 } from 'src/shared/errors/errors';
 import { TruckRepository } from './truck.repository';
 import { CreateTruckDto } from './dto/create-truck.dto';
-import { TruckResponseDto } from './dto/truck-response.dto';
 import { UpdateTruckDto } from './dto/update-truck.dto';
 import { UserRepository } from 'src/users/user.repository';
 import { OrderRepository } from 'src/orders/order.repository';
+import { Truck } from './entities/truck.entity';
 
 @Injectable()
 export class TrucksService {
@@ -20,8 +20,8 @@ export class TrucksService {
     @Inject(forwardRef(() => OrderRepository))
     private readonly orderRepository: OrderRepository,
   ) {}
-
-  async create(createTruckDto: CreateTruckDto): Promise<TruckResponseDto> {
+  //TruckResponseDto
+  async create(createTruckDto: CreateTruckDto): Promise<Truck> {
     const { user } = createTruckDto;
     const existingUser = await this.userRepository.findById(user);
 
@@ -35,27 +35,23 @@ export class TrucksService {
 
     const newTruck = await this.truckRepository.create(createTruckDto);
 
-    return TruckResponseDto.fromEntity(newTruck);
+    return newTruck; //TruckResponseDto.fromEntity(newTruck);
   }
 
-  async findAll(): Promise<TruckResponseDto[]> {
+  async findAll(): Promise<Truck[]> {
     const trucks = await this.truckRepository.findAll();
-
-    return trucks.map((truck) => TruckResponseDto.fromEntity(truck));
+    return trucks;
   }
 
-  async findById(id: string): Promise<TruckResponseDto> {
+  async findById(id: string): Promise<Truck> {
     const truck = await this.truckRepository.findById(id);
 
     if (!truck) throw new EntityNotFoundError('Truck', id);
 
-    return TruckResponseDto.fromEntity(truck);
+    return truck;
   }
 
-  async update(
-    id: string,
-    updateTruckDto: UpdateTruckDto,
-  ): Promise<TruckResponseDto> {
+  async update(id: string, updateTruckDto: UpdateTruckDto): Promise<Truck> {
     const { plates, user } = updateTruckDto;
 
     if (plates) {
@@ -72,7 +68,7 @@ export class TrucksService {
 
     if (!updatedTruck) throw new EntityNotFoundError('Truck', id);
 
-    return TruckResponseDto.fromEntity(updatedTruck);
+    return updatedTruck;
   }
 
   async delete(id: string): Promise<void> {

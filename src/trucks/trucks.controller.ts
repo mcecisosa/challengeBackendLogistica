@@ -45,7 +45,7 @@ export class TrucksController {
     @Body() createTruckDto: CreateTruckDto,
   ): Promise<TruckResponseDto> {
     const newTruck = await this.trucksService.create(createTruckDto);
-    return newTruck;
+    return TruckResponseDto.fromEntity(newTruck);
   }
 
   @Get()
@@ -55,9 +55,9 @@ export class TrucksController {
     type: TruckResponseDto,
     isArray: true,
   })
-  async findAll() {
+  async findAll(): Promise<TruckResponseDto[]> {
     const trucks = await this.trucksService.findAll();
-    return trucks;
+    return trucks.map((truck) => TruckResponseDto.fromEntity(truck));
   }
 
   @Get(':id')
@@ -67,9 +67,11 @@ export class TrucksController {
     description: 'Returns the truck with the specified id',
     type: TruckResponseDto,
   })
-  async findById(@Param('id', ParseObjectIdPipe) id: string) {
+  async findById(
+    @Param('id', ParseObjectIdPipe) id: string,
+  ): Promise<TruckResponseDto> {
     const truck = await this.trucksService.findById(id);
-    return truck;
+    return TruckResponseDto.fromEntity(truck);
   }
 
   @Patch(':id')
@@ -82,10 +84,9 @@ export class TrucksController {
   async update(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateTruckDto: UpdateTruckDto,
-  ) {
+  ): Promise<TruckResponseDto> {
     const updatedTruck = await this.trucksService.update(id, updateTruckDto);
-
-    return updatedTruck;
+    return TruckResponseDto.fromEntity(updatedTruck);
   }
 
   @Delete(':id')

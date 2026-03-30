@@ -57,7 +57,7 @@ export class OrdersController {
     type: OrderResponseDto,
     isArray: true,
   })
-  async findAll() {
+  async findAll(): Promise<OrderResponseDto[]> {
     const orders = await this.orderService.findAll();
 
     return orders.map((order) => OrderResponseDto.fromEntity(order));
@@ -70,7 +70,9 @@ export class OrdersController {
     description: 'Returns the order with the specified id',
     type: OrderResponseDto,
   })
-  async findById(@Param('id', ParseObjectIdPipe) id: string) {
+  async findById(
+    @Param('id', ParseObjectIdPipe) id: string,
+  ): Promise<OrderResponseDto> {
     const order = await this.orderService.findById(id);
     return OrderResponseDto.fromEntity(order);
   }
@@ -85,7 +87,7 @@ export class OrdersController {
   async update(
     @Param('id', ParseObjectIdPipe) id: string,
     @Body() updateOrderDto: UpdateOrderDto,
-  ) {
+  ): Promise<OrderResponseDto> {
     const updatedOrder = await this.orderService.update(id, updateOrderDto);
 
     return OrderResponseDto.fromEntity(updatedOrder);
