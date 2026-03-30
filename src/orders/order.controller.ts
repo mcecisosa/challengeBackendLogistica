@@ -45,7 +45,6 @@ export class OrdersController {
     @Body() createOrderDto: CreateOrderDto,
   ): Promise<OrderResponseDto> {
     const newOrder = await this.orderService.create(createOrderDto);
-    console.log('NEW ORDER DEL CONTROLLER:', newOrder);
 
     return OrderResponseDto.fromEntity(newOrder);
   }

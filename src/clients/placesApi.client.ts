@@ -30,8 +30,6 @@ export class PlacesApiClient {
     this.apiKey = this.configService.get<string>('PLACES_API_KEY', '');
   }
 
-  //https://maps.googleapis.com/maps/api/place/details/json?place_id=${place_id}&key=${api_key}
-
   async getPlaceData(place_id: string): Promise<PlaceApiInfo | null> {
     try {
       const url = `${this.apiUrl}place_id=${place_id}&key=${this.apiKey}`;
@@ -40,7 +38,6 @@ export class PlacesApiClient {
 
       if (response.data.status !== 'OK' || !response.data.result) return null;
 
-      //------------
       const data: PlaceApiInfo = {
         address: response.data.result.formatted_address,
         latitude: response.data.result.geometry.location.lat,

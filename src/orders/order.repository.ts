@@ -44,7 +44,6 @@ export class OrderRepository {
     const orders = await this.orderModel.aggregate<OrderDbRaw>([
       ...this.orderAggregationPipeline,
     ]);
-    console.log('DESP FIND ALL', orders);
 
     return orders.map((order) => OrderMapper.toEntity(order));
   }
@@ -64,8 +63,6 @@ export class OrderRepository {
     id: string,
     updateOrderData: UpdateOrderData,
   ): Promise<Order | null> {
-    console.log('DATA LLEGA UPDATE REPOS', updateOrderData);
-
     const { user, truck, pickup, dropoff } = updateOrderData;
 
     const dataToUpdate = {
@@ -78,7 +75,7 @@ export class OrderRepository {
     const updated = await this.orderModel.findByIdAndUpdate(id, dataToUpdate, {
       new: true,
     });
-    console.log('DATA LLEGA UPDATE updated', updated);
+
     if (!updated) return null;
 
     const result = await this.orderModel.aggregate<OrderDbRaw>([
@@ -86,11 +83,7 @@ export class OrderRepository {
       ...this.orderAggregationPipeline,
     ]);
 
-    console.log('DATA LLEGA UPDATE result', result);
-
     const orderData = result[0];
-
-    console.log('DATA LLEGA UPDATE orderData', orderData);
 
     if (!orderData) return null;
 
@@ -109,7 +102,7 @@ export class OrderRepository {
         new: true,
       },
     );
-    console.log('DATA LLEGA UPDATE updated', updated);
+
     if (!updated) return null;
 
     const result = await this.orderModel.aggregate<OrderDbRaw>([
@@ -117,11 +110,7 @@ export class OrderRepository {
       ...this.orderAggregationPipeline,
     ]);
 
-    console.log('DATA LLEGA UPDATE result', result);
-
     const orderData = result[0];
-
-    console.log('DATA LLEGA UPDATE orderData', orderData);
 
     if (!orderData) return null;
 

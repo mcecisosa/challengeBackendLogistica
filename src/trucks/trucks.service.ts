@@ -20,7 +20,7 @@ export class TrucksService {
     @Inject(forwardRef(() => OrderRepository))
     private readonly orderRepository: OrderRepository,
   ) {}
-  //TruckResponseDto
+
   async create(createTruckDto: CreateTruckDto): Promise<Truck> {
     const { user } = createTruckDto;
     const existingUser = await this.userRepository.findById(user);
@@ -35,7 +35,7 @@ export class TrucksService {
 
     const newTruck = await this.truckRepository.create(createTruckDto);
 
-    return newTruck; //TruckResponseDto.fromEntity(newTruck);
+    return newTruck;
   }
 
   async findAll(): Promise<Truck[]> {
@@ -74,7 +74,6 @@ export class TrucksService {
   async delete(id: string): Promise<void> {
     //hace control de si tiene ordenes asociados
     const existInOrder = await this.orderRepository.OrderHasTruck(id);
-    console.log('existInOrder:', existInOrder);
 
     if (existInOrder)
       throw new BadRequestError(

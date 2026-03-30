@@ -75,8 +75,6 @@ export class UsersService {
 
     if (!updatedUser) throw new EntityNotFoundError('User', id);
 
-    console.log('updated:', updatedUser);
-
     return updatedUser;
   }
 
@@ -85,10 +83,8 @@ export class UsersService {
     //hace control de si tiene ordenes asociados
 
     const existInOrder = await this.orderRepository.OrderHasUser(id);
-    console.log('existInOrder:', existInOrder);
 
     const existInTruck = await this.truckRepository.TruckHasUser(id);
-    console.log('existInTruck:', existInTruck);
 
     if (existInOrder || existInTruck)
       throw new BadRequestError(
