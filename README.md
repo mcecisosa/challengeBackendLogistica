@@ -12,23 +12,28 @@ Autenticación con JWT y control de token en cada servicio.
 - Login retorna token JWT.
 - Los endpoints requieren un token valido para permitir el acceso.
 
+
 2. Users
 - Endpoints CRUD.
+
 
 3. Trucks
 - Datos de truck: user, color, year and plates.
 - Endpoints CRUD.
+
 
 4. Locations
 - Datos de location: place_id de Google Maps.
 - Se obtiene la dirección y coordenadas del place_id utilizando la API de Google Maps.
 - Endpoints CRUD.
 
+
 5. Ordenes
 - Datos de orden: user, status, truck, pickup, dropoff.
 - Endpoints CRUD + endpoint para cambiar el status de una orden.
 
-Para todos los dominios, se realizan controles de datos de entrada, control de duplicados al registrar y modificar y controles al eliminar. Ejemplo no se puede eliminar una location si esta asociada a una orden.
+Para todos los dominios, se realizan controles de datos de entrada, control de duplicados al registrar y modificar, y controles al eliminar. Ejemplo: no se puede eliminar una location si esta asociada a una orden.
+
 
 ## Pre-Requisites
 
@@ -48,11 +53,12 @@ chmod 711 ./up.sh
 
 - Node: node:20.9.0
 - Nest: 11.0.1
-- Mongoose
+- Typescript
 - MongoDB
+- Mongoose
 
 
-## Decisiones Tomdas
+## Decisiones Tomadas
 
 - NestJS: para establecer arquitectura modular con separación de responsabilidades de cada dominio, lo cual facilita el     mantenimiento. Uso del patrón de inyección de dependencias para desacoplar clases. Typescript Nativo para definición de interfaces y DTOs.
 - Clean Architecture: permite el manejo de cambios a futuro To be able to handle further changes in the future in a proper way.
